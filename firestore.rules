@@ -1,0 +1,114 @@
+rules_version = '2';
+
+// Data model: see PLAN.md §4. Every business-scoped collection lives under
+// businesses/{bizId}; a signed-in user can read/write a business's data only
+// if their uid is a key in that business's `members` map (PLAN.md §4 "Security
+// rules" + this repo's Phase 1 "members-ready" design — one owner today,
+// staff can be added later without a rules rewrite).
+//
+// A few fields are Cloud-Functions-only (Admin SDK bypasses these rules
+// entirely) and are explicitly blocked from client writes here:
+//   - businesses/{bizId}.members, .subscriptionStatus, .smsProvider
+//   - appointments/{id}.reminderSentAt, .followUpSentAt
+//   - numberIndex/*, and conversations/*/messages with direction != 'out'
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function businessData(bizId) {
+      return get(/databases/$(database)/documents/businesses/$(bizId)).data;
+    }
+
+    function isMember(bizId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/businesses/$(bizId))
+        && businessData(bizId).members[request.auth.uid] != null;
+    }
+
+    // users/{uid} — a client-side pointer from a signed-in user to their
+    // business (see BusinessContext.tsx). Only the user themselves can read
+    // or create it; it's never updated or deleted from the client since
+    // Phase 1 gives one business per user.
+    match /users/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update, delete: if false;
+    }
+
+    match /businesses/{bizId} {
+      // Deliberately NOT `isMember(bizId)` here: that helper does a get()
+      // on this exact document, and a get() a rule performs on the very
+      // document it's evaluating is self-referential. It happened to pass
+      // the first time (from the client's initial optimistic write) but
+      // then failed on the live listener's next re-evaluation — the real
+      // symptom was a freshly onboarded business flickering back to "no
+      // business" and bouncing the user to /onboarding. `resource.data` IS
+      // this document already; no get() is needed to read it.
+      allow read: if isSignedIn() && resource.data.members[request.auth.uid] != null;
+
+      // Onboarding (OnboardingPage.tsx) creates the business doc itself, so
+      // there's no `resource` to check membership against yet — instead
+      // require the creator to be its sole 'owner'.
+      allow create: if isSignedIn()
+        && request.resource.data.members[request.auth.uid] == 'owner'
+        && request.resource.data.members.size() == 1;
+
+      // Settings (hours, timezone, name, services menu, trial dates) are
+      // client-editable; membership, subscription state and texting
+      // credentials are not — those change only via Cloud Functions
+      // (invite/billing/Twilio-setup flows, none built yet in Phase 1).
+      allow update: if isSignedIn() && resource.data.members[request.auth.uid] != null
+        && request.resource.data.members == resource.data.members
+        && request.resource.data.subscriptionStatus == resource.data.subscriptionStatus
+        && request.resource.data.get('smsProvider', null) == resource.data.get('smsProvider', null);
+
+      allow delete: if false;
+
+      match /services/{serviceId} {
+        allow read, write: if isMember(bizId);
+      }
+
+      match /households/{householdId} {
+        allow read, write: if isMember(bizId);
+      }
+
+      match /pets/{petId} {
+        allow read, write: if isMember(bizId);
+      }
+
+      match /appointments/{appointmentId} {
+        allow read: if isMember(bizId);
+        allow create: if isMember(bizId)
+          && !request.resource.data.keys().hasAny(['reminderSentAt', 'followUpSentAt']);
+        allow update: if isMember(bizId)
+          && request.resource.data.get('reminderSentAt', null) == resource.data.get('reminderSentAt', null)
+          && request.resource.data.get('followUpSentAt', null) == resource.data.get('followUpSentAt', null);
+        allow delete: if isMember(bizId);
+      }
+
+      // Phase 2 (messaging) — declared now so rules don't need a rewrite
+      // when that collection starts being written to.
+      match /conversations/{householdId} {
+        allow read: if isMember(bizId);
+        allow write: if isMember(bizId);
+
+        match /messages/{messageId} {
+          allow read: if isMember(bizId);
+          // The groomer can send ('out'); inbound ('in') and automated
+          // ('auto') messages are written only by Cloud Functions.
+          allow create: if isMember(bizId) && request.resource.data.direction == 'out';
+          allow update, delete: if false;
+        }
+      }
+    }
+
+    // Routes an inbound text to the right business (PLAN.md §4). Written
+    // only by the Cloud Function that provisions a business's Twilio
+    // number — never by the client.
+    match /numberIndex/{e164} {
+      allow read, write: if false;
+    }
+  }
+}

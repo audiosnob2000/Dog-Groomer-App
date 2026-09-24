@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  @apply bg-slate-50 text-slate-900 antialiased;
+}
+
+/* Keep focus rings visible for keyboard users at the front desk and the
+   grooming table — this app is used on a mouse-less phone half the time. */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-indigo-600;
+}

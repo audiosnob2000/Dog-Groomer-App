@@ -1,0 +1,12 @@
+# Firebase CLI
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+pubsub-debug.log
+
+# Node (scripts/ has its own package.json + node_modules, outside app/)
+node_modules/
+
+# OS
+.DS_Store

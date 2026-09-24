@@ -1,0 +1,13 @@
+{
+  "name": "slotted-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Standalone dev-tooling scripts (seeding, etc.) — not bundled into the app.",
+  "scripts": {
+    "seed": "node seed.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "luxon": "^3.5.0"
+  }
+}
