@@ -6,6 +6,7 @@ import { useBusiness } from '../../contexts/BusinessContext'
 import { appointmentsCol, householdsCol, petsCol } from '../../firebase/firestore'
 import { useCollectionData } from '../../hooks/useCollectionData'
 import { STATUS_LABELS, statusColorClasses } from '../../lib/appointmentStatus'
+import { avatarColorFor } from '../../lib/avatarColors'
 import { formatTime, vaccineStatus } from '../../lib/datetime'
 import { formatCents } from '../../lib/money'
 import type { Appointment, Pet } from '../../types/models'
@@ -72,7 +73,10 @@ export default function TodayPage() {
 
   const activeToday = todayAppointments.filter((a) => a.status !== 'cancelled')
   const dogsToday = new Set(activeToday.flatMap((a) => a.petIds)).size
-  const unpaidToday = todayAppointments.filter((a) => a.payment.status !== 'paid').length
+  const bookedTotal = todayAppointments.reduce((sum, a) => sum + a.payment.subtotal, 0)
+  const unpaidTotal = todayAppointments
+    .filter((a) => a.payment.status !== 'paid')
+    .reduce((sum, a) => sum + a.payment.subtotal, 0)
   const unconfirmedToday = todayAppointments.filter(
     (a) => a.confirmRequested && a.status === 'booked',
   )
@@ -121,155 +125,253 @@ export default function TodayPage() {
   }, [pets, recentCompleted, timezone])
 
   const greeting = now.hour < 12 ? 'Good morning' : now.hour < 17 ? 'Good afternoon' : 'Good evening'
+  const ownerFirstName = business?.name?.split(' ')[0]
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">
-          {greeting}
-          {business?.name ? `, ${business.name}` : ''}
-        </h1>
-        <p className="text-sm text-slate-500">{now.toFormat('cccc, LLLL d, yyyy')}</p>
-      </div>
+    <div className="flex flex-col gap-[26px]">
+      <header className="flex items-end justify-between gap-6">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[12.5px] font-medium uppercase tracking-[0.08em] text-ink-muted">
+            {now.toFormat('cccc, LLLL d')}
+          </span>
+          <h1 className="font-serif text-5xl font-normal leading-[1.02] tracking-tight">
+            {greeting}{ownerFirstName ? `, ${ownerFirstName}.` : '.'}
+          </h1>
+        </div>
+        <Link
+          to="/calendar"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-accent bg-accent px-4 text-sm font-medium text-white no-underline hover:bg-accent-dark"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          New booking
+        </Link>
+      </header>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard label="Dogs today" value={dogsToday} />
-        <StatCard label="Booked" value={todayAppointments.length} />
-        <StatCard label="Unpaid" value={unpaidToday} />
-        <StatCard label="Unread" value="—" hint="Messaging arrives in Phase 2" />
+        <StatCard label="Booked today" value={formatCents(bookedTotal)} />
+        <StatCard label="Awaiting payment" value={formatCents(unpaidTotal)} tone={unpaidTotal > 0 ? 'danger' : undefined} />
+        <StatCard label="Unread messages" value="—" sub="Messaging arrives in Phase 2" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <section className="lg:col-span-2">
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
-            Today's schedule
-          </h2>
-          {apptsLoading && <p className="text-sm text-slate-500">Loading…</p>}
+      <div className="flex min-h-0 flex-grow gap-[22px]">
+        <section className="min-w-0 flex-grow rounded-[18px] border border-border bg-white p-4 pb-3">
+          <div className="mb-1.5 flex items-center justify-between px-2 pb-1.5">
+            <h2 className="m-0 text-[15.5px] font-semibold">Today's schedule</h2>
+            <span className="text-[13px] text-ink-muted">
+              {todayAppointments.length} {todayAppointments.length === 1 ? 'appointment' : 'appointments'} · {dogsToday} dogs
+            </span>
+          </div>
+
+          {apptsLoading && <p className="px-2 py-4 text-sm text-ink-muted">Loading…</p>}
           {!apptsLoading && todayAppointments.length === 0 && (
-            <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
+            <div className="p-6 text-center text-sm text-ink-muted">
               Nothing booked for today.{' '}
-              <Link to="/calendar" className="text-indigo-600 hover:text-indigo-500">
+              <Link to="/calendar" className="font-medium text-accent no-underline">
                 Go to the calendar
               </Link>{' '}
               to add a booking.
             </div>
           )}
-          <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
-            {todayAppointments.map((appt) => (
-              <li key={appt.id}>
-                <Link
-                  to={`/households/${appt.householdId}`}
-                  className="flex items-center justify-between px-4 py-3 hover:bg-slate-50"
+
+          {todayAppointments.map((appt) => {
+            const avatar = avatarColorFor(petNames(appt) || appt.id)
+            return (
+              <Link
+                key={appt.id}
+                to={`/households/${appt.householdId}`}
+                className="grid grid-cols-[76px_40px_minmax(110px,1fr)_auto_64px] items-center gap-x-3 border-b border-border-soft px-3.5 py-2.5 no-underline last:border-b-0 hover:bg-page"
+              >
+                <span className="text-[15px] font-semibold tabular-nums text-ink-dim">
+                  {formatTime(appt.startAt, timezone)}
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-serif text-xl leading-none"
+                  style={{ background: avatar.bg, color: avatar.text }}
                 >
-                  <div>
-                    <p className="font-medium text-slate-900">
-                      {formatTime(appt.startAt, timezone)} · {householdName(appt.householdId)}
-                    </p>
-                    <p className="text-sm text-slate-500">{petNames(appt)}</p>
-                  </div>
-                  <span
-                    className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusColorClasses(appt)}`}
-                  >
-                    {STATUS_LABELS[appt.status]}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                  {(petNames(appt) || '?').charAt(0).toUpperCase()}
+                </span>
+                <span className="min-w-0 truncate">
+                  <span className="text-[14.5px] font-semibold text-ink">{petNames(appt)}</span>
+                  <span className="text-[12.5px] text-ink-muted"> · {householdName(appt.householdId)}</span>
+                </span>
+                <span
+                  className={`inline-flex h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-2.5 text-xs font-medium ${statusColorClasses(appt)}`}
+                >
+                  {STATUS_LABELS[appt.status]}
+                </span>
+                <span className="text-right text-sm font-medium tabular-nums text-ink-dim">
+                  {formatCents(appt.payment.subtotal)}
+                </span>
+              </Link>
+            )
+          })}
         </section>
 
-        <section className="space-y-6">
-          <div>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
-              Needs attention
-            </h2>
-            <div className="space-y-2">
+        <aside className="flex w-[372px] shrink-0 flex-col gap-3.5">
+          <section className="flex flex-col gap-3.5 rounded-[18px] border border-border bg-white p-5">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="m-0 text-[15.5px] font-semibold tracking-tight">Needs attention</h2>
+              <span className="text-[12.5px] text-ink-muted">
+                {unconfirmedToday.length + unpaidCompleted.length + expiringVaccinePets.length} items
+              </span>
+            </div>
+            <div className="flex flex-col gap-3">
               {unconfirmedToday.map((appt) => (
                 <AttentionRow
                   key={`unconfirmed-${appt.id}`}
                   to={`/households/${appt.householdId}`}
-                  tone="amber"
-                  text={`${householdName(appt.householdId)} hasn't confirmed today's ${formatTime(appt.startAt, timezone)} visit`}
+                  tone="warn"
+                  title={`${householdName(appt.householdId)} hasn't confirmed`}
+                  detail={`Today at ${formatTime(appt.startAt, timezone)}.`}
+                  action="Text now"
                 />
               ))}
               {unpaidCompleted.slice(0, 5).map((appt) => (
                 <AttentionRow
                   key={`unpaid-${appt.id}`}
                   to={`/households/${appt.householdId}`}
-                  tone="orange"
-                  text={`${householdName(appt.householdId)} owes ${formatCents(appt.payment.subtotal + (appt.payment.tip ?? 0))}`}
+                  tone="danger"
+                  title={`${householdName(appt.householdId)} · ${formatCents(appt.payment.subtotal + (appt.payment.tip ?? 0))} unpaid`}
+                  detail="Visit completed, payment still owed."
+                  action="Text a payment link"
                 />
               ))}
               {expiringVaccinePets.slice(0, 5).map(({ pet, vaccine, status }) => (
                 <AttentionRow
                   key={`vax-${pet.id}-${vaccine.type}`}
                   to={`/households/${pet.householdId}`}
-                  tone="red"
-                  text={`${pet.name}'s ${vaccine.type} vaccine ${status === 'expired' ? 'has expired' : 'expires soon'}`}
+                  tone="info"
+                  title={`${pet.name}'s ${vaccine.type} vaccine ${status === 'expired' ? 'has expired' : 'expires soon'}`}
+                  detail="Ask the owner for an updated record."
                 />
               ))}
               {unconfirmedToday.length === 0 &&
                 unpaidCompleted.length === 0 &&
                 expiringVaccinePets.length === 0 && (
-                  <p className="text-sm text-slate-400">Nothing needs attention. 🎉</p>
+                  <p className="text-sm text-ink-muted">Nothing needs attention. 🎉</p>
                 )}
             </div>
-          </div>
+          </section>
 
-          <div>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
-              Due to rebook
-            </h2>
+          <section className="flex flex-col gap-3.5 rounded-[18px] border border-border bg-white p-5">
+            <h2 className="m-0 text-[15.5px] font-semibold tracking-tight">Due to rebook</h2>
             {dueToRebook.length === 0 && (
-              <p className="text-sm text-slate-400">No one's overdue for a rebook.</p>
+              <p className="text-sm text-ink-muted">No one's overdue for a rebook.</p>
             )}
-            <div className="space-y-2">
-              {dueToRebook.slice(0, 8).map(({ pet, dueSince }) => (
-                <AttentionRow
-                  key={pet.id}
-                  to={`/households/${pet.householdId}`}
-                  tone="slate"
-                  text={`${pet.name} was due ${dueSince.toFormat('MMM d')}`}
-                />
-              ))}
+            <div className="flex flex-col gap-3">
+              {dueToRebook.slice(0, 6).map(({ pet, dueSince }) => {
+                const avatar = avatarColorFor(pet.name)
+                return (
+                  <Link
+                    key={pet.id}
+                    to={`/households/${pet.householdId}`}
+                    className="flex items-center gap-3 no-underline"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full font-serif text-[19px] leading-none"
+                      style={{ background: avatar.bg, color: avatar.text }}
+                    >
+                      {pet.name.charAt(0).toUpperCase()}
+                    </span>
+                    <div className="flex flex-grow flex-col gap-0.5">
+                      <span className="text-sm font-semibold text-ink">
+                        {pet.name} · {householdName(pet.householdId)}
+                      </span>
+                      <span className="text-[12.5px] text-ink-muted">
+                        Due {dueSince.toFormat('MMM d')} · usually every {pet.rebookEveryWeeks} weeks
+                      </span>
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
-          </div>
+          </section>
 
-          <div>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">
-              Reminder queue
-            </h2>
-            <div className="rounded-xl border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-              Automatic confirmation texts and follow-ups go out once client texting is connected
-              (Phase 2 — Settings → Texting).
+          <section className="flex flex-col gap-2.5 rounded-[18px] bg-ink p-5 text-dark-text">
+            <div className="flex items-center gap-2 text-[12.5px] font-medium text-dark-accent-text">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
+              </svg>
+              Automatic reminders
             </div>
-          </div>
-        </section>
+            <div className="font-serif text-2xl leading-[1.15]">
+              Coming in Phase 2 — 24-hour text reminders, sent automatically.
+            </div>
+            <div className="text-[12.5px] leading-relaxed text-dark-text/80">
+              Once client texting is connected, reminders go out 24 hours before each appointment and
+              clients can reply to confirm.
+            </div>
+          </section>
+        </aside>
       </div>
     </div>
   )
 }
 
-function StatCard({ label, value, hint }: { label: string; value: number | string; hint?: string }) {
+function StatCard({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string
+  value: number | string
+  sub?: string
+  tone?: 'danger'
+}) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4" title={hint}>
-      <p className="text-2xl font-semibold text-slate-900">{value}</p>
-      <p className="text-xs text-slate-500">{label}</p>
+    <div className="flex flex-col gap-1.5 rounded-[18px] border border-border bg-white px-5 py-4.5">
+      <span className="text-[13px] font-medium text-ink-muted">{label}</span>
+      <span className="font-serif text-4xl leading-none tracking-tight tabular-nums">{value}</span>
+      {sub && (
+        <span className={`text-[12.5px] ${tone === 'danger' ? 'text-danger-text' : 'text-ink-muted'}`}>
+          {sub}
+        </span>
+      )}
     </div>
   )
 }
 
-const TONE_CLASSES: Record<string, string> = {
-  amber: 'bg-amber-50 border-amber-200 text-amber-800',
-  orange: 'bg-orange-50 border-orange-200 text-orange-800',
-  red: 'bg-red-50 border-red-200 text-red-800',
-  slate: 'bg-slate-50 border-slate-200 text-slate-700',
+const TONE_ICON_CLASSES: Record<string, string> = {
+  danger: 'bg-danger-soft text-danger-text',
+  warn: 'bg-warn-soft text-warn-text',
+  info: 'bg-accent-pale text-accent',
 }
 
-function AttentionRow({ to, tone, text }: { to: string; tone: keyof typeof TONE_CLASSES; text: string }) {
+function AttentionRow({
+  to,
+  tone,
+  title,
+  detail,
+  action,
+}: {
+  to: string
+  tone: keyof typeof TONE_ICON_CLASSES
+  title: string
+  detail: string
+  action?: string
+}) {
   return (
-    <Link to={to} className={`block rounded-lg border px-3 py-2 text-sm hover:opacity-80 ${TONE_CLASSES[tone]}`}>
-      {text}
+    <Link to={to} className="flex items-start gap-3 no-underline">
+      <span
+        aria-hidden="true"
+        className={`mt-0.5 flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] ${TONE_ICON_CLASSES[tone]}`}
+      >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 2" />
+        </svg>
+      </span>
+      <span className="flex min-w-0 flex-grow flex-col gap-0.5">
+        <span className="text-sm font-semibold text-ink">{title}</span>
+        <span className="text-[12.5px] leading-relaxed text-ink-muted">{detail}</span>
+        {action && <span className="mt-0.5 text-[13px] font-medium text-accent">{action}</span>}
+      </span>
     </Link>
   )
 }

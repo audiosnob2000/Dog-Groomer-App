@@ -117,7 +117,7 @@ export default function BookingModal({
     <Modal open={open} onClose={resetAndClose} title="New booking" wide>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex flex-col gap-1">
-          <label htmlFor="booking-household" className="text-sm font-medium text-slate-700">
+          <label htmlFor="booking-household" className="text-xs text-ink-muted">
             Household
           </label>
           <select
@@ -127,7 +127,7 @@ export default function BookingModal({
               setHouseholdId(e.target.value)
               setPetIds([])
             }}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500"
+            className="rounded-xl border border-border px-3 py-2 text-sm focus:border-accent"
           >
             <option value="">Select a household…</option>
             {households.map((h) => (
@@ -140,9 +140,9 @@ export default function BookingModal({
 
         {householdId && (
           <div>
-            <span className="mb-1 block text-sm font-medium text-slate-700">Pets</span>
+            <span className="mb-1 block text-xs text-ink-muted">Pets</span>
             {petsForHousehold.length === 0 ? (
-              <p className="text-sm text-slate-400">This household has no pets yet.</p>
+              <p className="text-sm text-ink-muted">This household has no pets yet.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {petsForHousehold.map((pet) => (
@@ -152,8 +152,8 @@ export default function BookingModal({
                     onClick={() => togglePet(pet.id)}
                     className={`rounded-full px-3 py-1 text-sm ${
                       petIds.includes(pet.id)
-                        ? 'bg-indigo-600 text-white'
-                        : 'border border-slate-300 text-slate-600 hover:bg-slate-50'
+                        ? 'bg-accent text-white'
+                        : 'border border-border text-ink-dim hover:bg-page'
                     }`}
                   >
                     {pet.name}
@@ -165,36 +165,36 @@ export default function BookingModal({
         )}
 
         <div>
-          <span className="mb-1 block text-sm font-medium text-slate-700">Services</span>
+          <span className="mb-1 block text-xs text-ink-muted">Services</span>
           <div className="space-y-1">
             {services.map((service) => (
               <label
                 key={service.id}
-                className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="flex cursor-pointer items-center justify-between rounded-xl border border-border px-3 py-2 text-sm"
               >
                 <span className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={serviceIds.includes(service.id)}
                     onChange={() => toggleService(service.id)}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+                    className="h-4 w-4 rounded border-border text-accent"
                   />
                   {service.name}{' '}
-                  <span className="text-xs text-slate-400">({service.durationMin} min)</span>
+                  <span className="text-xs text-ink-muted">({service.durationMin} min)</span>
                 </span>
-                <span className="text-slate-600">{formatCents(service.price)}</span>
+                <span className="text-ink-dim">{formatCents(service.price)}</span>
               </label>
             ))}
           </div>
           {totalDurationMin > 0 && (
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-ink-muted">
               Total: {totalDurationMin} min · {formatCents(totalPrice)}
             </p>
           )}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="booking-date" className="text-sm font-medium text-slate-700">
+          <label htmlFor="booking-date" className="text-xs text-ink-muted">
             Date
           </label>
           <input
@@ -205,15 +205,15 @@ export default function BookingModal({
               setDate(e.target.value)
               setSelectedSlot(null)
             }}
-            className="w-48 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500"
+            className="w-48 rounded-xl border border-border px-3 py-2 text-sm focus:border-accent"
           />
         </div>
 
         {totalDurationMin > 0 && (
           <div>
-            <span className="mb-1 block text-sm font-medium text-slate-700">Available times</span>
+            <span className="mb-1 block text-xs text-ink-muted">Available times</span>
             {slots.length === 0 ? (
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-ink-muted">
                 No slots long enough for {totalDurationMin} minutes on this day.
               </p>
             ) : (
@@ -225,10 +225,10 @@ export default function BookingModal({
                       key={iso}
                       type="button"
                       onClick={() => setSelectedSlot(iso)}
-                      className={`rounded-lg px-3 py-1.5 text-sm ${
+                      className={`rounded-xl px-3 py-1.5 text-sm ${
                         selectedSlot === iso
-                          ? 'bg-indigo-600 text-white'
-                          : 'border border-slate-300 text-slate-600 hover:bg-slate-50'
+                          ? 'bg-accent text-white'
+                          : 'border border-border text-ink-dim hover:bg-page'
                       }`}
                     >
                       {slot.toFormat('h:mm a')}
@@ -240,17 +240,17 @@ export default function BookingModal({
           </div>
         )}
 
-        <label className="flex items-center gap-2 text-sm text-slate-700">
+        <label className="flex items-center gap-2 text-sm text-ink">
           <input
             type="checkbox"
             checked={confirmRequested}
             onChange={(e) => setConfirmRequested(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+            className="h-4 w-4 rounded border-border text-accent"
           />
           Send a confirmation reminder 24 hours before (Phase 2 — recorded now, sent once texting is set up)
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger-text">{error}</p>}
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" onClick={resetAndClose}>

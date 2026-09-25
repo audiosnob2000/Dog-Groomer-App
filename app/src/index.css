@@ -1,7 +1,39 @@
 @import 'tailwindcss';
 
+/*
+ * Design tokens, pulled from the design mockup
+ * (https://claude.ai/artifact/Tg96dmvG8sMc8nWSVFwDPJ) rather than invented —
+ * a warm cream/forest-green palette with a serif+sans type pairing, not
+ * Tailwind's default blue/slate.
+ */
 @theme {
-  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+
+  --color-page: #f6f3ed; /* page background */
+  --color-sidebar: #f0ece4; /* sidebar background */
+  --color-card: #ffffff;
+  --color-border: #e5dfd4; /* card/input borders */
+  --color-border-soft: #efebe3; /* row dividers, segmented-control track */
+
+  --color-ink: #1c1a17; /* primary text; also the "dark card" background */
+  --color-ink-dim: #58524a; /* secondary text */
+  --color-ink-muted: #6b645a; /* tertiary/label text */
+  --color-placeholder: #7a7368;
+
+  --color-accent: #34503f; /* forest green — primary actions, active nav */
+  --color-accent-dark: #26392d; /* hover */
+  --color-accent-soft: #e4ebe3; /* confirmed-status pill bg */
+  --color-accent-soft-text: #2e4637;
+  --color-accent-pale: #dce6dc; /* avatar bg */
+
+  --color-warn-soft: #f6ecd3; /* awaiting-reply pill bg */
+  --color-warn-text: #7a5810;
+  --color-danger-soft: #f5e4da; /* unpaid pill bg */
+  --color-danger-text: #9c4a2a;
+
+  --color-dark-text: #f6f3ed; /* text on the dark (--color-ink) card */
+  --color-dark-accent-text: #cfe0d2;
 }
 
 :root {
@@ -16,11 +48,26 @@ body,
 
 body {
   margin: 0;
-  @apply bg-slate-50 text-slate-900 antialiased;
+  background: var(--color-page);
+  color: var(--color-ink);
+  /* Tailwind's arbitrary text-[14.5px]-style sizes (used throughout to
+     match the mockup's exact type scale) don't come with a paired
+     line-height the way text-sm etc. do — leaving line-height at the
+     browser default made two stacked lines (e.g. a pet's name over its
+     household) render tight enough to look like overlapping text. A sane
+     default here fixes every such spot at once; an explicit leading-*
+     utility elsewhere still overrides it as normal. */
+  line-height: 1.4;
+  @apply antialiased;
+}
+
+input::placeholder {
+  color: var(--color-placeholder);
 }
 
 /* Keep focus rings visible for keyboard users at the front desk and the
    grooming table — this app is used on a mouse-less phone half the time. */
 :focus-visible {
-  @apply outline-2 outline-offset-2 outline-indigo-600;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }

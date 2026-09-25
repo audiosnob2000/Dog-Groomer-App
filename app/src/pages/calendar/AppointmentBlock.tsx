@@ -21,9 +21,9 @@ export default function AppointmentBlock({
   return (
     <Link
       to={`/households/${appointment.householdId}`}
-      className={`block rounded-md border px-2 py-1 text-left text-xs leading-tight hover:opacity-80 ${statusColorClasses(appointment)}`}
+      className={`block rounded-[10px] px-2.5 py-1.5 text-left text-xs leading-tight no-underline hover:opacity-90 ${statusColorClasses(appointment)}`}
     >
-      <div className="font-medium">
+      <div className="font-semibold">
         {formatTime(appointment.startAt, timezone)} · {householdName}
       </div>
       {!compact && (

@@ -36,7 +36,7 @@ export default function DayView({ date, business, appointments, householdName, p
 
   if (!openInterval) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+      <div className="rounded-[18px] border border-dashed border-border p-8 text-center text-sm text-ink-muted">
         Closed on {date.toFormat('cccc')}s.
         {dayAppointments.length > 0 && (
           <p className="mt-2">There {dayAppointments.length === 1 ? 'is' : 'are'} still {dayAppointments.length} appointment(s) booked.</p>
@@ -46,10 +46,10 @@ export default function DayView({ date, business, appointments, householdName, p
   }
 
   return (
-    <div className="flex rounded-xl border border-slate-200 bg-white">
-      <div className="w-16 shrink-0 border-r border-slate-100 text-right text-xs text-slate-400">
+    <div className="flex rounded-[18px] border border-border bg-white">
+      <div className="w-16 shrink-0 border-r border-border-soft text-right text-[11.5px] tabular-nums text-ink-muted">
         {Array.from({ length: totalHours }, (_, i) => startHour + i).map((hour) => (
-          <div key={hour} style={{ height: HOUR_HEIGHT_PX }} className="pr-2 pt-1">
+          <div key={hour} style={{ height: HOUR_HEIGHT_PX }} className="pr-2.5 pt-1">
             {DateTime.fromObject({ hour }).toFormat('h a')}
           </div>
         ))}
@@ -58,16 +58,13 @@ export default function DayView({ date, business, appointments, householdName, p
         {Array.from({ length: totalHours }, (_, i) => (
           <div
             key={i}
-            className="absolute inset-x-0 border-t border-slate-100"
+            className="absolute inset-x-0 border-t border-border-soft"
             style={{ top: i * HOUR_HEIGHT_PX }}
           />
         ))}
         {isToday && nowOffsetPx >= 0 && nowOffsetPx <= totalHours * HOUR_HEIGHT_PX && (
-          <div
-            className="absolute inset-x-0 z-10 border-t-2 border-red-500"
-            style={{ top: nowOffsetPx }}
-          >
-            <span className="absolute -left-1 -top-1 h-2 w-2 rounded-full bg-red-500" />
+          <div className="absolute inset-x-0 z-10 border-t-2 border-danger-text" style={{ top: nowOffsetPx }}>
+            <span className="absolute -left-1 -top-1 h-2.5 w-2.5 rounded-full bg-danger-text" />
           </div>
         )}
         {dayAppointments.map((appt) => {
@@ -79,10 +76,10 @@ export default function DayView({ date, business, appointments, householdName, p
             <Link
               key={appt.id}
               to={`/households/${appt.householdId}`}
-              className={`absolute left-1 right-1 overflow-hidden rounded-md border px-2 py-1 text-xs shadow-sm hover:opacity-90 ${statusColorClasses(appt)}`}
+              className={`absolute left-1 right-1 overflow-hidden rounded-[10px] px-2.5 py-1.5 text-xs no-underline hover:opacity-90 ${statusColorClasses(appt)}`}
               style={{ top, height }}
             >
-              <div className="font-medium">
+              <div className="font-semibold">
                 {formatTime(appt.startAt, date.zone!.name)} · {householdName(appt.householdId)}
               </div>
               <div className="truncate opacity-80">{petNames(appt)}</div>
@@ -91,7 +88,7 @@ export default function DayView({ date, business, appointments, householdName, p
           )
         })}
         {dayAppointments.length === 0 && (
-          <p className="p-4 text-sm text-slate-400">Nothing booked yet.</p>
+          <p className="p-4 text-sm text-ink-muted">Nothing booked yet.</p>
         )}
       </div>
     </div>

@@ -130,9 +130,9 @@ export default function HouseholdFormModal({
         />
 
         <div className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">Contacts</span>
+          <span className="text-sm font-medium text-ink">Contacts</span>
           {contacts.map((contact, i) => (
-            <div key={i} className="rounded-lg border border-slate-200 p-3">
+            <div key={i} className="rounded-xl border border-border p-3">
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <TextField
                   label="Name"
@@ -154,12 +154,12 @@ export default function HouseholdFormModal({
                 />
               </div>
               <div className="mt-2 flex items-center justify-between">
-                <label className="flex items-center gap-1.5 text-xs text-slate-600">
+                <label className="flex items-center gap-1.5 text-xs text-ink-dim">
                   <input
                     type="checkbox"
                     checked={contact.smsConsent}
                     onChange={(e) => updateContact(i, { smsConsent: e.target.checked })}
-                    className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600"
+                    className="h-3.5 w-3.5 rounded border-border text-accent"
                   />
                   Agreed to receive text messages
                 </label>
@@ -167,7 +167,7 @@ export default function HouseholdFormModal({
                   <button
                     type="button"
                     onClick={() => removeContact(i)}
-                    className="text-xs text-red-500 hover:text-red-700"
+                    className="text-xs text-danger-text hover:opacity-70"
                   >
                     Remove
                   </button>
@@ -185,7 +185,7 @@ export default function HouseholdFormModal({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="household-notes" className="text-sm font-medium text-slate-700">
+          <label htmlFor="household-notes" className="text-sm font-medium text-ink">
             Notes (optional)
           </label>
           <textarea
@@ -193,11 +193,11 @@ export default function HouseholdFormModal({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500"
+            className="rounded-xl border border-border px-3 py-2 text-sm text-ink focus:border-accent"
           />
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger-text">{error}</p>}
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" onClick={resetAndClose}>

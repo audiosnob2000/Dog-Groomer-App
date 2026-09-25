@@ -5,6 +5,7 @@ import Button from '../../components/ui/Button'
 import { useBusiness } from '../../contexts/BusinessContext'
 import { householdsCol, petsCol } from '../../firebase/firestore'
 import { useCollectionData } from '../../hooks/useCollectionData'
+import { avatarColorFor } from '../../lib/avatarColors'
 import { formatPhoneForDisplay } from '../../lib/phone'
 import CsvImportModal from './CsvImportModal'
 import HouseholdFormModal from './HouseholdFormModal'
@@ -38,54 +39,69 @@ export default function HouseholdsPage() {
   }, [households, search])
 
   return (
-    <div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-slate-900">Households</h1>
-        <div className="flex gap-2">
+    <div className="flex flex-col gap-5">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <h1 className="font-serif text-4xl font-normal leading-none tracking-tight">Households</h1>
+        <div className="flex gap-2.5">
           <Button variant="secondary" onClick={() => setImportOpen(true)}>
             Import CSV
           </Button>
           <Button onClick={() => setAddOpen(true)}>+ Add household</Button>
         </div>
-      </div>
+      </header>
 
-      <input
-        type="search"
-        placeholder="Search by household, contact name or phone…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="mb-4 w-full max-w-md rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500"
-      />
+      <label className="flex h-11 w-full max-w-md items-center gap-2.5 rounded-xl border border-border bg-white px-3.5 text-ink-muted">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+        <input
+          type="search"
+          aria-label="Search households"
+          placeholder="Search by household, contact name or phone…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="min-w-0 flex-grow border-0 bg-transparent text-sm text-ink outline-none"
+        />
+      </label>
 
-      {loading && <p className="text-sm text-slate-500">Loading…</p>}
+      {loading && <p className="text-sm text-ink-muted">Loading…</p>}
 
       {!loading && filtered.length === 0 && (
-        <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
+        <div className="rounded-[18px] border border-dashed border-border p-8 text-center text-sm text-ink-muted">
           {households.length === 0
             ? 'No households yet. Add your first one, or import a client list from CSV.'
             : 'No households match your search.'}
         </div>
       )}
 
-      <ul className="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+      <ul className="flex flex-col overflow-hidden rounded-[18px] border border-border bg-white">
         {filtered.map((household) => {
           const primaryContact = household.contacts[0]
           const petCount = petCountByHousehold.get(household.id) ?? 0
+          const avatar = avatarColorFor(household.displayName)
           return (
-            <li key={household.id}>
+            <li key={household.id} className="border-b border-border-soft last:border-b-0">
               <Link
                 to={`/households/${household.id}`}
-                className="flex items-center justify-between px-4 py-3 hover:bg-slate-50"
+                className="flex items-center gap-3.5 px-4 py-3 no-underline hover:bg-page"
               >
-                <div>
-                  <p className="font-medium text-slate-900">{household.displayName}</p>
+                <span
+                  aria-hidden="true"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-serif text-lg leading-none"
+                  style={{ background: avatar.bg, color: avatar.text }}
+                >
+                  {household.displayName.charAt(0).toUpperCase()}
+                </span>
+                <div className="min-w-0 flex-grow">
+                  <p className="font-medium text-ink">{household.displayName}</p>
                   {primaryContact && (
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-ink-muted">
                       {primaryContact.name} · {formatPhoneForDisplay(primaryContact.phoneE164)}
                     </p>
                   )}
                 </div>
-                <span className="text-sm text-slate-400">
+                <span className="shrink-0 text-sm text-ink-muted">
                   {petCount} {petCount === 1 ? 'pet' : 'pets'}
                 </span>
               </Link>

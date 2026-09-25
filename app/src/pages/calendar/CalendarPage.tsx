@@ -5,6 +5,7 @@ import Button from '../../components/ui/Button'
 import { useBusiness } from '../../contexts/BusinessContext'
 import { appointmentsCol, householdsCol, petsCol } from '../../firebase/firestore'
 import { useCollectionData } from '../../hooks/useCollectionData'
+import { formatCents } from '../../lib/money'
 import type { Appointment } from '../../types/models'
 import BookingModal from './BookingModal'
 import DayView from './DayView'
@@ -12,6 +13,13 @@ import MonthView from './MonthView'
 import WeekView from './WeekView'
 
 type ViewMode = 'day' | 'week' | 'month'
+
+const LEGEND = [
+  { label: 'Confirmed', swatch: 'bg-accent-soft' },
+  { label: 'Awaiting reply', swatch: 'bg-warn-soft' },
+  { label: 'Unpaid', swatch: 'bg-danger-soft' },
+  { label: 'Done', swatch: 'bg-border-soft' },
+] as const
 
 export default function CalendarPage() {
   const { business } = useBusiness()
@@ -87,37 +95,65 @@ export default function CalendarPage() {
     setView('day')
   }
 
-  const headerLabel =
+  const activeAppointments = appointments.filter((a) => a.status !== 'cancelled')
+  const bookedTotal = activeAppointments.reduce((sum, a) => sum + a.payment.subtotal, 0)
+
+  const eyebrow =
     view === 'day'
-      ? anchor.toFormat('cccc, LLLL d, yyyy')
+      ? `${activeAppointments.length} appointments · ${formatCents(bookedTotal)} booked`
       : view === 'week'
-        ? `${anchor.startOf('week').toFormat('LLL d')} – ${anchor.endOf('week').toFormat('LLL d, yyyy')}`
-        : anchor.toFormat('LLLL yyyy')
+        ? `Week of ${anchor.startOf('week').toFormat('LLL d')} · ${activeAppointments.length} appointments · ${formatCents(bookedTotal)} booked`
+        : `${activeAppointments.length} appointments · ${formatCents(bookedTotal)} booked`
+
+  const titleLabel =
+    view === 'day' ? anchor.toFormat('cccc, LLLL d') : view === 'week' ? anchor.toFormat('LLLL yyyy') : anchor.toFormat('LLLL yyyy')
 
   return (
-    <div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={goPrev} aria-label="Previous">
-            ←
-          </Button>
-          <Button variant="secondary" onClick={goToday}>
-            Today
-          </Button>
-          <Button variant="secondary" onClick={goNext} aria-label="Next">
-            →
-          </Button>
-          <h1 className="ml-2 text-lg font-semibold text-slate-900">{headerLabel}</h1>
+    <div className="flex flex-col gap-[22px]">
+      <header className="flex items-end justify-between gap-6">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[12.5px] font-medium uppercase tracking-[0.08em] text-ink-muted">
+            {eyebrow}
+          </span>
+          <h1 className="font-serif text-[46px] font-normal leading-[1.02] tracking-tight">
+            {titleLabel}
+          </h1>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-slate-300 p-0.5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              aria-label="Previous"
+              onClick={goPrev}
+              className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-border bg-white"
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              onClick={goToday}
+              className="h-10 rounded-[10px] border border-border bg-white px-3.5 text-[13.5px] font-medium"
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              aria-label="Next"
+              onClick={goNext}
+              className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-border bg-white"
+            >
+              →
+            </button>
+          </div>
+          <div role="group" aria-label="View" className="flex gap-0.5 rounded-xl bg-border-soft p-[3px]">
             {(['day', 'week', 'month'] as ViewMode[]).map((mode) => (
               <button
                 key={mode}
                 type="button"
+                aria-pressed={view === mode}
                 onClick={() => setView(mode)}
-                className={`rounded-md px-3 py-1 text-sm capitalize ${
-                  view === mode ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-slate-100'
+                className={`h-[34px] rounded-[9px] px-3.5 text-[13.5px] capitalize ${
+                  view === mode ? 'bg-white font-medium shadow-[0_1px_2px_rgba(28,26,23,0.08)]' : 'text-ink-dim'
                 }`}
               >
                 {mode}
@@ -126,10 +162,19 @@ export default function CalendarPage() {
           </div>
           <Button onClick={() => setBookingOpen(true)}>+ New booking</Button>
         </div>
+      </header>
+
+      <div className="flex items-center gap-[18px]">
+        {LEGEND.map((item) => (
+          <span key={item.label} className="inline-flex items-center gap-1.5 text-xs text-ink-dim">
+            <span className={`h-2.5 w-2.5 rounded-[3px] ${item.swatch}`} />
+            {item.label}
+          </span>
+        ))}
       </div>
 
-      {loading && <p className="text-sm text-slate-500">Loading…</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {loading && <p className="text-sm text-ink-muted">Loading…</p>}
+      {error && <p className="text-sm text-danger-text">{error}</p>}
 
       {!loading && view === 'day' && (
         <DayView

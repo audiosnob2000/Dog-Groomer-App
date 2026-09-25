@@ -24,7 +24,7 @@ export default function WeekView({
   const now = DateTime.now().setZone(weekStart.zone)
 
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-7">
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-7">
       {days.map((day, i) => {
         const dayKey = WEEKDAY_ORDER[i]
         const isOpen = business.hours[dayKey].isOpen
@@ -34,18 +34,28 @@ export default function WeekView({
           .sort((a, b) => a.startAt.toMillis() - b.startAt.toMillis())
 
         return (
-          <div key={day.toISODate()} className="rounded-xl border border-slate-200 bg-white p-2">
+          <div key={day.toISODate()} className="rounded-[14px] border border-border bg-white p-2.5">
             <button
               type="button"
               onClick={() => onSelectDay(day)}
-              className={`mb-2 w-full rounded-md px-2 py-1 text-left text-xs font-semibold ${
-                isToday ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-slate-100'
-              }`}
+              className="mb-2 flex w-full items-center gap-2 rounded-lg px-1 py-1 text-left hover:bg-page"
             >
-              {day.toFormat('EEE d')}
+              <span
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-serif text-lg leading-none ${
+                  isToday ? 'bg-ink text-dark-text' : 'text-ink'
+                }`}
+              >
+                {day.day}
+              </span>
+              <span className="flex flex-col">
+                <span className="text-[13px] font-semibold">{day.toFormat('EEE')}</span>
+                <span className="text-[11px] text-ink-muted">
+                  {dayAppointments.length} {dayAppointments.length === 1 ? 'booking' : 'bookings'}
+                </span>
+              </span>
             </button>
-            {!isOpen && <p className="px-2 text-xs text-slate-300">Closed</p>}
-            <div className="space-y-1">
+            {!isOpen && <p className="px-1.5 text-xs text-ink-muted/60">Closed</p>}
+            <div className="flex flex-col gap-1">
               {dayAppointments.map((appt) => (
                 <AppointmentBlock
                   key={appt.id}

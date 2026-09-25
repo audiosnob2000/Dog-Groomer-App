@@ -38,14 +38,14 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-page px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-slate-900">Slotted</h1>
-          <p className="mt-1 text-sm text-slate-500">Set up your shop</p>
+          <h1 className="font-serif text-4xl font-normal text-ink">Slotted</h1>
+          <p className="mt-1 text-sm text-ink-muted">Set up your shop</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-white p-6 shadow-sm">
           <TextField
             label="Email"
             type="email"
@@ -73,16 +73,16 @@ export default function SignupPage() {
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-danger-text">{error}</p>}
 
           <Button type="submit" loading={loading} className="w-full">
             Create account
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-ink-muted">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link to="/login" className="font-medium text-accent hover:text-accent-dark">
             Sign in
           </Link>
         </p>

@@ -46,14 +46,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-page px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold text-slate-900">Slotted</h1>
-          <p className="mt-1 text-sm text-slate-500">Sign in to your shop</p>
+          <h1 className="font-serif text-4xl font-normal text-ink">Slotted</h1>
+          <p className="mt-1 text-sm text-ink-muted">Sign in to your shop</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-border bg-white p-6 shadow-sm">
           <TextField
             label="Email"
             type="email"
@@ -71,7 +71,7 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-danger-text">{error}</p>}
           {resetSent && (
             <p className="text-sm text-green-700">Password reset email sent — check your inbox.</p>
           )}
@@ -83,15 +83,15 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleForgotPassword}
-            className="w-full text-center text-xs text-slate-500 hover:text-slate-700"
+            className="w-full text-center text-xs text-ink-muted hover:text-ink"
           >
             Forgot password?
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
+        <p className="mt-6 text-center text-sm text-ink-muted">
           New here?{' '}
-          <Link to="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link to="/signup" className="font-medium text-accent hover:text-accent-dark">
             Create an account
           </Link>
         </p>

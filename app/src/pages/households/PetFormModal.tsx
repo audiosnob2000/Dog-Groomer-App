@@ -116,14 +116,14 @@ export default function PetFormModal({ bizId, householdId, open, onClose, pet }:
           <TextField label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
           <TextField label="Breed" value={breed} onChange={(e) => setBreed(e.target.value)} />
           <div className="flex flex-col gap-1">
-            <label htmlFor="pet-sex" className="text-sm font-medium text-slate-700">
+            <label htmlFor="pet-sex" className="text-sm font-medium text-ink">
               Sex
             </label>
             <select
               id="pet-sex"
               value={sex}
               onChange={(e) => setSex(e.target.value as Pet['sex'])}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500"
+              className="rounded-xl border border-border px-3 py-2 text-sm focus:border-accent"
             >
               <option value="unknown">Unknown</option>
               <option value="male">Male</option>
@@ -148,7 +148,7 @@ export default function PetFormModal({ bizId, householdId, open, onClose, pet }:
         </div>
 
         <div>
-          <h3 className="mb-2 text-sm font-semibold text-slate-700">Groom notes</h3>
+          <h3 className="mb-2 text-sm font-semibold text-ink">Groom notes</h3>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <TextField label="Body" value={body} onChange={(e) => setBody(e.target.value)} />
             <TextField label="Face" value={face} onChange={(e) => setFace(e.target.value)} />
@@ -166,16 +166,16 @@ export default function PetFormModal({ bizId, householdId, open, onClose, pet }:
 
         <div>
           <div className="mb-1 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-700">Vaccines</h3>
+            <h3 className="text-sm font-semibold text-ink">Vaccines</h3>
             <button
               type="button"
               onClick={() => setVaccines((prev) => [...prev, { type: '', expiresOn: '' }])}
-              className="text-xs font-medium text-indigo-600 hover:text-indigo-500"
+              className="text-xs font-medium text-accent hover:text-accent-dark"
             >
               + Add vaccine
             </button>
           </div>
-          {vaccines.length === 0 && <p className="text-xs text-slate-400">None on file.</p>}
+          {vaccines.length === 0 && <p className="text-xs text-ink-muted">None on file.</p>}
           {vaccines.map((v, i) => (
             <div key={i} className="mb-2 flex items-end gap-2">
               <div className="flex-1">
@@ -205,7 +205,7 @@ export default function PetFormModal({ bizId, householdId, open, onClose, pet }:
               <button
                 type="button"
                 onClick={() => setVaccines((prev) => prev.filter((_, idx) => idx !== i))}
-                className="mb-2 text-xs text-red-500 hover:text-red-700"
+                className="mb-2 text-xs text-danger-text hover:opacity-70"
               >
                 Remove
               </button>
@@ -213,7 +213,7 @@ export default function PetFormModal({ bizId, householdId, open, onClose, pet }:
           ))}
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger-text">{error}</p>}
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" onClick={close}>

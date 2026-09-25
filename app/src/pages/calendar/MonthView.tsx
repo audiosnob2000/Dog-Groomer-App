@@ -22,14 +22,14 @@ export default function MonthView({ month, appointments, householdName, onSelect
 
   return (
     <div>
-      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-t-xl border border-slate-200 bg-slate-200 text-center text-xs font-semibold text-slate-500">
+      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-t-[14px] border border-border bg-border text-center text-xs font-semibold text-ink-muted">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label) => (
-          <div key={label} className="bg-slate-50 py-1.5">
+          <div key={label} className="bg-sidebar py-1.5">
             {label}
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-b-xl border-x border-b border-slate-200 bg-slate-200">
+      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-b-[14px] border-x border-b border-border bg-border">
         {days.map((day) => {
           const inMonth = day.hasSame(monthStart, 'month')
           const isToday = now.hasSame(day, 'day')
@@ -42,26 +42,26 @@ export default function MonthView({ month, appointments, householdName, onSelect
               key={day.toISODate()}
               type="button"
               onClick={() => onSelectDay(day)}
-              className={`min-h-24 bg-white p-1.5 text-left align-top ${inMonth ? '' : 'bg-slate-50'} hover:bg-slate-50`}
+              className={`min-h-24 bg-white p-1.5 text-left align-top hover:bg-page ${inMonth ? '' : 'bg-page/60'}`}
             >
               <span
-                className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs ${
-                  isToday ? 'bg-indigo-600 text-white' : inMonth ? 'text-slate-700' : 'text-slate-300'
+                className={`mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full font-serif text-xs ${
+                  isToday ? 'bg-ink text-dark-text' : inMonth ? 'text-ink' : 'text-ink-muted/50'
                 }`}
               >
                 {day.day}
               </span>
-              <div className="space-y-0.5">
+              <div className="flex flex-col gap-0.5">
                 {dayAppointments.slice(0, MAX_CHIPS_PER_DAY).map((appt) => (
                   <div
                     key={appt.id}
-                    className={`truncate rounded border px-1 py-0.5 text-[10px] ${statusColorClasses(appt)}`}
+                    className={`truncate rounded px-1 py-0.5 text-[10px] ${statusColorClasses(appt)}`}
                   >
                     {householdName(appt.householdId)}
                   </div>
                 ))}
                 {dayAppointments.length > MAX_CHIPS_PER_DAY && (
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px] text-ink-muted">
                     +{dayAppointments.length - MAX_CHIPS_PER_DAY} more
                   </p>
                 )}

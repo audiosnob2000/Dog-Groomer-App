@@ -153,19 +153,19 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10">
+    <div className="min-h-screen bg-page px-4 py-10">
       <div className="mx-auto w-full max-w-2xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-slate-900">Set up your shop</h1>
-            <p className="text-sm text-slate-500">
+            <h1 className="font-serif text-2xl font-normal text-ink">Set up your shop</h1>
+            <p className="text-sm text-ink-muted">
               Step {step + 1} of {STEPS.length}: {STEPS[step]}
             </p>
           </div>
           <button
             type="button"
             onClick={() => void signOutUser()}
-            className="text-xs text-slate-400 hover:text-slate-600"
+            className="text-xs text-ink-muted hover:text-ink-dim"
           >
             Sign out
           </button>
@@ -175,12 +175,12 @@ export default function OnboardingPage() {
           {STEPS.map((label, i) => (
             <li
               key={label}
-              className={`h-1.5 flex-1 rounded-full ${i <= step ? 'bg-indigo-600' : 'bg-slate-200'}`}
+              className={`h-1.5 flex-1 rounded-full ${i <= step ? 'bg-accent' : 'bg-border'}`}
             />
           ))}
         </ol>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-white p-6 shadow-sm">
           {step === 0 && (
             <div className="space-y-4">
               <TextField
@@ -198,14 +198,14 @@ export default function OnboardingPage() {
                 required
               />
               <div className="flex flex-col gap-1">
-                <label htmlFor="timezone" className="text-sm font-medium text-slate-700">
+                <label htmlFor="timezone" className="text-sm font-medium text-ink">
                   Time zone
                 </label>
                 <select
                   id="timezone"
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
-                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500"
+                  className="rounded-xl border border-border px-3 py-2 text-sm text-ink focus:border-accent"
                 >
                   {TIMEZONES.map((tz) => (
                     <option key={tz} value={tz}>
@@ -213,7 +213,7 @@ export default function OnboardingPage() {
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-ink-muted">
                   Used to calculate "24 hours before" reminders and daylight saving correctly.
                 </p>
               </div>
@@ -222,17 +222,17 @@ export default function OnboardingPage() {
 
           {step === 1 && (
             <div className="space-y-3">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-muted">
                 When is the shop open? You can change this later in Settings.
               </p>
               {WEEKDAY_ORDER.map((day) => (
-                <div key={day} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
-                  <label className="flex w-32 items-center gap-2 text-sm font-medium text-slate-700">
+                <div key={day} className="flex items-center gap-3 rounded-xl border border-border p-3">
+                  <label className="flex w-32 items-center gap-2 text-sm font-medium text-ink">
                     <input
                       type="checkbox"
                       checked={hours[day].isOpen}
                       onChange={(e) => updateHoursDay(day, { isOpen: e.target.checked })}
-                      className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+                      className="h-4 w-4 rounded border-border text-accent"
                     />
                     {WEEKDAY_LABELS[day]}
                   </label>
@@ -242,18 +242,18 @@ export default function OnboardingPage() {
                         type="time"
                         value={hours[day].opensAt}
                         onChange={(e) => updateHoursDay(day, { opensAt: e.target.value })}
-                        className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
+                        className="rounded-xl border border-border px-2 py-1 text-sm"
                       />
-                      <span className="text-slate-400">to</span>
+                      <span className="text-ink-muted">to</span>
                       <input
                         type="time"
                         value={hours[day].closesAt}
                         onChange={(e) => updateHoursDay(day, { closesAt: e.target.value })}
-                        className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
+                        className="rounded-xl border border-border px-2 py-1 text-sm"
                       />
                     </div>
                   ) : (
-                    <span className="flex-1 text-sm text-slate-400">Closed</span>
+                    <span className="flex-1 text-sm text-ink-muted">Closed</span>
                   )}
                 </div>
               ))}
@@ -262,12 +262,12 @@ export default function OnboardingPage() {
 
           {step === 2 && (
             <div className="space-y-3">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-ink-muted">
                 Your services menu. Booking will only offer time slots that fit the total length.
               </p>
               <div className="space-y-2">
                 {services.map((service, i) => (
-                  <div key={i} className="flex flex-wrap items-end gap-2 rounded-lg border border-slate-200 p-3">
+                  <div key={i} className="flex flex-wrap items-end gap-2 rounded-xl border border-border p-3">
                     <div className="min-w-[10rem] flex-1">
                       <TextField
                         label="Service"
@@ -295,19 +295,19 @@ export default function OnboardingPage() {
                         onChange={(e) => updateService(i, { priceInput: e.target.value })}
                       />
                     </div>
-                    <label className="flex items-center gap-1.5 pb-2 text-xs text-slate-600">
+                    <label className="flex items-center gap-1.5 pb-2 text-xs text-ink-dim">
                       <input
                         type="checkbox"
                         checked={service.isAddOn}
                         onChange={(e) => updateService(i, { isAddOn: e.target.checked })}
-                        className="h-3.5 w-3.5 rounded border-slate-300 text-indigo-600"
+                        className="h-3.5 w-3.5 rounded border-border text-accent"
                       />
                       Add-on
                     </label>
                     <button
                       type="button"
                       onClick={() => removeService(i)}
-                      className="mb-2 text-xs text-red-500 hover:text-red-700"
+                      className="mb-2 text-xs text-danger-text hover:opacity-70"
                     >
                       Remove
                     </button>
@@ -323,15 +323,15 @@ export default function OnboardingPage() {
           {step === 3 && (
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <h2 className="text-sm font-semibold text-slate-700">{name || '(no name)'}</h2>
-                <p className="text-sm text-slate-500">{email}</p>
-                <p className="text-sm text-slate-500">{timezone}</p>
+                <h2 className="text-sm font-semibold text-ink">{name || '(no name)'}</h2>
+                <p className="text-sm text-ink-muted">{email}</p>
+                <p className="text-sm text-ink-muted">{timezone}</p>
               </div>
               <div>
-                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                   Hours
                 </h3>
-                <ul className="text-sm text-slate-600">
+                <ul className="text-sm text-ink-dim">
                   {WEEKDAY_ORDER.map((day) => (
                     <li key={day}>
                       {WEEKDAY_LABELS[day]}:{' '}
@@ -341,10 +341,10 @@ export default function OnboardingPage() {
                 </ul>
               </div>
               <div>
-                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                   Services
                 </h3>
-                <ul className="text-sm text-slate-600">
+                <ul className="text-sm text-ink-dim">
                   {services
                     .filter((s) => s.name.trim())
                     .map((s, i) => (
@@ -356,7 +356,7 @@ export default function OnboardingPage() {
                 </ul>
               </div>
 
-              {error && <p className="text-sm text-red-600">{error}</p>}
+              {error && <p className="text-sm text-danger-text">{error}</p>}
 
               <Button type="submit" loading={submitting} className="w-full">
                 Create my shop

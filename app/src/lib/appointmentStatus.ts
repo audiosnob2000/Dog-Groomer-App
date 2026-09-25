@@ -10,25 +10,29 @@ export const STATUS_LABELS: Record<Appointment['status'], string> = {
   cancelled: 'Cancelled',
 }
 
-/** Background/text color for a status pill or calendar block, per PLAN.md §2 (status colors on the calendar). */
+/**
+ * Status pill/block colors, matching the design mockup's palette exactly
+ * (https://claude.ai/artifact/Tg96dmvG8sMc8nWSVFwDPJ — Main.dc.html and
+ * Calendar.dc.html's status pills and legend).
+ */
 export function statusColorClasses(appointment: Appointment): string {
   switch (appointment.status) {
     case 'confirmed':
-      return 'bg-green-100 text-green-800 border-green-200'
+      return 'bg-accent-soft text-accent-soft-text border-transparent'
     case 'booked':
-      return 'bg-amber-100 text-amber-800 border-amber-200'
+      return 'bg-warn-soft text-warn-text border-transparent'
     case 'checked_in':
     case 'in_progress':
-      return 'bg-blue-100 text-blue-800 border-blue-200'
+      return 'bg-accent text-white border-transparent'
     case 'completed':
       return appointment.payment.status !== 'paid'
-        ? 'bg-orange-100 text-orange-800 border-orange-200'
-        : 'bg-slate-100 text-slate-600 border-slate-200'
+        ? 'bg-danger-soft text-danger-text border-transparent'
+        : 'bg-border-soft text-ink-dim border-transparent'
     case 'no_show':
-      return 'bg-red-100 text-red-700 border-red-200'
+      return 'bg-danger-soft text-danger-text border-transparent'
     case 'cancelled':
-      return 'bg-slate-100 text-slate-400 border-slate-200 line-through'
+      return 'bg-border-soft text-ink-muted border-transparent line-through'
     default:
-      return 'bg-slate-100 text-slate-600 border-slate-200'
+      return 'bg-border-soft text-ink-dim border-transparent'
   }
 }

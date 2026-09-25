@@ -111,14 +111,14 @@ export default function CsvImportModal({ bizId, open, onClose }: CsvImportModalP
   return (
     <Modal open={open} onClose={handleClose} title="Import client list from CSV" wide>
       <div className="space-y-4">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-ink-muted">
           Switching from another system? Export your client list as a CSV with columns like{' '}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">household</code>,{' '}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">contact name</code>,{' '}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">phone</code>,{' '}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">email</code>,{' '}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">pet name</code>,{' '}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs">breed</code>. One row per pet
+          <code className="rounded bg-page px-1 py-0.5 text-xs">household</code>,{' '}
+          <code className="rounded bg-page px-1 py-0.5 text-xs">contact name</code>,{' '}
+          <code className="rounded bg-page px-1 py-0.5 text-xs">phone</code>,{' '}
+          <code className="rounded bg-page px-1 py-0.5 text-xs">email</code>,{' '}
+          <code className="rounded bg-page px-1 py-0.5 text-xs">pet name</code>,{' '}
+          <code className="rounded bg-page px-1 py-0.5 text-xs">breed</code>. One row per pet
           — two dogs in one household get two rows.
         </p>
 
@@ -134,13 +134,13 @@ export default function CsvImportModal({ bizId, open, onClose }: CsvImportModalP
         />
 
         {parsed && (
-          <div className="rounded-lg border border-slate-200 p-3">
-            <p className="text-sm text-slate-700">
+          <div className="rounded-xl border border-border p-3">
+            <p className="text-sm text-ink">
               <strong>{fileName}</strong>: found {parsed.householdCount} households and{' '}
               {parsed.petCount} pets across {parsed.rows.length} rows.
             </p>
             {parsed.skippedRows.length > 0 && (
-              <p className="mt-1 text-xs text-amber-600">
+              <p className="mt-1 text-xs text-warn-text">
                 Skipped {parsed.skippedRows.length} row(s) missing a household name or phone
                 number (rows {parsed.skippedRows.slice(0, 10).join(', ')}
                 {parsed.skippedRows.length > 10 ? ', …' : ''}).
@@ -149,8 +149,8 @@ export default function CsvImportModal({ bizId, open, onClose }: CsvImportModalP
           </div>
         )}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {result && <p className="text-sm text-green-700">{result}</p>}
+        {error && <p className="text-sm text-danger-text">{error}</p>}
+        {result && <p className="text-sm text-accent-soft-text">{result}</p>}
 
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" onClick={handleClose}>
