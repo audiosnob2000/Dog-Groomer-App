@@ -110,24 +110,27 @@ export default function AppLayout() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => void handleSignOut()}
-          className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 text-left hover:bg-black/[0.03]"
-        >
+        <div className="flex items-center gap-2.5 rounded-lg px-1.5 py-1">
           <span
             aria-hidden="true"
             className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-accent-pale font-serif text-[17px] leading-none text-accent"
           >
             {ownerInitial}
           </span>
-          <span className="flex flex-col gap-px">
-            <span className="text-[13.5px] font-medium">{user?.email}</span>
+          <span className="flex min-w-0 flex-col gap-px">
+            <span className="truncate text-[13.5px] font-medium">{user?.email}</span>
             <span className="text-xs text-ink-muted">
               Owner{business?.subscriptionStatus === 'trialing' ? ' · Trial' : ''}
             </span>
           </span>
-        </button>
+          <button
+            type="button"
+            onClick={() => void handleSignOut()}
+            className="ml-auto shrink-0 text-xs font-medium text-ink-muted hover:text-ink"
+          >
+            Sign out
+          </button>
+        </div>
       </nav>
 
       <main className="min-w-0 grow overflow-y-auto px-10 py-8">
