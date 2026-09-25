@@ -64,6 +64,17 @@ export interface Business {
   smsProvider?: SmsProvider
   /** Members-ready from day one: solo owner today, staff can be added later (salon tier). */
   members: Record<string, MemberRole>
+  /**
+   * True only for the one shared "try the demo" account. Purely a marker
+   * for the UI (shows the "Reset demo data" button) — it does not affect
+   * Firestore security rules, which stay membership-based for everyone.
+   * The public "Try the demo" button's read-only lock is enforced
+   * separately, client-side (see DemoModeContext) — see PLAN.md-adjacent
+   * discussion: a real server-side lock would need Cloud Functions, which
+   * don't exist until Phase 2, so this is a deliberate, honest trade-off
+   * for a low-stakes shared demo account, not a security boundary.
+   */
+  isDemo?: boolean
   createdAt: Timestamp
   updatedAt: Timestamp
 }

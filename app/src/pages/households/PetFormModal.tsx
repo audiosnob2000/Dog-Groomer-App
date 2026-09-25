@@ -1,9 +1,12 @@
 import { Timestamp, addDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { type FormEvent, useState } from 'react'
 import Button from '../../components/ui/Button'
+import DemoSavedNotice from '../../components/ui/DemoSavedNotice'
 import Modal from '../../components/ui/Modal'
 import TextField from '../../components/ui/TextField'
+import { useDemoMode } from '../../contexts/DemoModeContext'
 import { petsCol } from '../../firebase/firestore'
+import { simulateDemoSave } from '../../lib/demoSave'
 import type { Pet, Vaccine } from '../../types/models'
 
 interface DraftVaccine {
@@ -28,6 +31,7 @@ interface PetFormModalProps {
 }
 
 export default function PetFormModal({ bizId, householdId, open, onClose, pet }: PetFormModalProps) {
+  const { isDemoReadOnly } = useDemoMode()
   const isEditing = Boolean(pet)
   const [name, setName] = useState(pet?.name ?? '')
   const [breed, setBreed] = useState(pet?.breed ?? '')
@@ -41,9 +45,12 @@ export default function PetFormModal({ bizId, householdId, open, onClose, pet }:
   const [handlingFlagsInput, setHandlingFlagsInput] = useState(pet?.handlingFlags.join(', ') ?? '')
   const [vaccines, setVaccines] = useState<DraftVaccine[]>(toDraftVaccines(pet))
   const [saving, setSaving] = useState(false)
+  const [demoSaved, setDemoSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   function close() {
+    setSaving(false)
+    setDemoSaved(false)
     setError(null)
     onClose()
   }
@@ -56,6 +63,12 @@ export default function PetFormModal({ bizId, householdId, open, onClose, pet }:
     }
     setSaving(true)
     setError(null)
+
+    if (isDemoReadOnly) {
+      setDemoSaved(true)
+      simulateDemoSave(close)
+      return
+    }
 
     try {
       const vaccineRecords: Vaccine[] = vaccines
@@ -213,6 +226,7 @@ export default function PetFormModal({ bizId, householdId, open, onClose, pet }:
           ))}
         </div>
 
+        {demoSaved && <DemoSavedNotice />}
         {error && <p className="text-sm text-danger-text">{error}</p>}
 
         <div className="flex justify-end gap-2">

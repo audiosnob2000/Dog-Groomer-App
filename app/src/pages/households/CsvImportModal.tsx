@@ -2,8 +2,10 @@ import { Timestamp, doc, serverTimestamp, writeBatch } from 'firebase/firestore'
 import { useRef, useState } from 'react'
 import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
+import { useDemoMode } from '../../contexts/DemoModeContext'
 import { db } from '../../firebase/config'
 import { householdsCol, petsCol } from '../../firebase/firestore'
+import { simulateDemoSave } from '../../lib/demoSave'
 import { type GroupedHousehold, type ParsedImport, groupRowsByHousehold, parseHouseholdsCsv } from './csvImport'
 
 // Firestore batches top out at 500 writes; stay comfortably under that.
@@ -16,6 +18,7 @@ interface CsvImportModalProps {
 }
 
 export default function CsvImportModal({ bizId, open, onClose }: CsvImportModalProps) {
+  const { isDemoReadOnly } = useDemoMode()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [parsed, setParsed] = useState<ParsedImport | null>(null)
   const [fileName, setFileName] = useState('')
@@ -56,6 +59,20 @@ export default function CsvImportModal({ bizId, open, onClose }: CsvImportModalP
     if (!parsed) return
     setImporting(true)
     setError(null)
+
+    if (isDemoReadOnly) {
+      const groups = groupRowsByHousehold(parsed.rows)
+      const petsImported = groups.reduce((sum, g) => sum + g.pets.length, 0)
+      simulateDemoSave(() => {
+        setResult(
+          `Imported ${groups.length} households and ${petsImported} pets. (Demo mode — this wasn't actually saved.)`,
+        )
+        setParsed(null)
+        setImporting(false)
+      })
+      return
+    }
+
     try {
       const groups: GroupedHousehold[] = groupRowsByHousehold(parsed.rows)
       let petsImported = 0

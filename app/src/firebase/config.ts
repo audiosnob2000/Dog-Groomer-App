@@ -1,6 +1,6 @@
 import { type FirebaseOptions, initializeApp } from 'firebase/app'
 import { connectAuthEmulator, getAuth } from 'firebase/auth'
-import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore'
+import { connectFirestoreEmulator, initializeFirestore } from 'firebase/firestore'
 import { connectFunctionsEmulator, getFunctions } from 'firebase/functions'
 
 /**
@@ -28,7 +28,15 @@ export const isRealFirebaseConfig = Boolean(import.meta.env.VITE_FIREBASE_API_KE
 
 export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
-export const db = getFirestore(app)
+// ignoreUndefinedProperties: several forms build their write payload with
+// `field: value || undefined` for optional fields (household notes, a
+// pet's breed/weight, etc.) — the Firestore client SDK rejects a JS
+// `undefined` in a write by default (a real bug this caught: adding a
+// household with an empty Notes field threw "Unsupported field value:
+// undefined"). This setting treats "explicitly undefined" the same as
+// "key omitted" everywhere, which is what every one of those call sites
+// actually means.
+export const db = initializeFirestore(app, { ignoreUndefinedProperties: true })
 export const functions = getFunctions(app)
 
 const useEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true'

@@ -75,6 +75,17 @@ The GitHub Actions workflow (`.github/workflows/deploy.yml`) builds `app/` and p
 
 GitHub Pages must be enabled once, manually: repo Settings → Pages → Source → "GitHub Actions".
 
+## "Try the demo" mode
+
+The login page can show a "Try the demo — no sign-up needed" button that signs a visitor straight into one shared demo account, read-only: forms open and validate normally, but submitting shows a "this is a demo" message instead of actually writing to Firestore (`DemoModeContext.tsx` — see its comments for exactly what this does and doesn't protect against; it's a client-side lock for a low-stakes shared account, not a security boundary).
+
+To set it up:
+
+1. Create a real account for the demo (sign up through the app normally, or have someone with a Firebase service account key run `scripts/seed.mjs` against the real project — see that script's own comments).
+2. Set `VITE_DEMO_EMAIL` / `VITE_DEMO_PASSWORD` — locally in `app/.env.local`, and as the `DEMO_EMAIL` / `DEMO_PASSWORD` repo secrets for the GitHub Pages deploy. The button is hidden entirely until both are set.
+
+Signing into that same account through the *normal* email/password form (not the demo button) is full, unrestricted access — that's how you'd fix anything a demo visitor fiddles with, though the in-app **"Reset demo data"** button (shown in the sidebar only for that account, only outside read-only mode) is the easier way: one click wipes and recreates the standard 5-household demo dataset (`src/lib/demoSeedData.ts` / `resetDemoData.ts`).
+
 ## Security rules
 
 `firestore.rules` enforces one rule throughout: every read/write under `businesses/{bizId}` requires `request.auth.uid` to be a key in that business's `members` map (PLAN.md §4). Phase 1 only ever puts one `'owner'` in that map, but the map (not a bare `ownerUid` field) is there from day one so adding staff later (the salon tier PLAN.md mentions) doesn't need a rules rewrite. A few fields are blocked from client writes entirely — `subscriptionStatus`, `smsProvider`, appointment `reminderSentAt`/`followUpSentAt` — because Phase 2–4's Cloud Functions own them.

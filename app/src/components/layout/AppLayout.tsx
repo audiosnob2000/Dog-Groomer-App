@@ -1,6 +1,8 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useBusiness } from '../../contexts/BusinessContext'
+import { useDemoMode } from '../../contexts/DemoModeContext'
+import ResetDemoDataButton from './ResetDemoDataButton'
 
 // Icon paths copied from the design mockup (Main.dc.html's sidebar) for
 // exact visual parity — 24x24 viewBox, 1.7 stroke, round caps/joins.
@@ -48,8 +50,23 @@ function NavIcon({ name }: { name: string }) {
 export default function AppLayout() {
   const { business } = useBusiness()
   const { user, signOutUser } = useAuth()
+  const { isDemoReadOnly, exitReadOnlyDemo } = useDemoMode()
+  const navigate = useNavigate()
 
   const ownerInitial = (user?.email ?? '?').charAt(0).toUpperCase()
+
+  async function handleSignOut() {
+    exitReadOnlyDemo()
+    await signOutUser()
+  }
+
+  // Signing up needs to actually land on the signup form — but /signup
+  // redirects a signed-in user straight back here (RedirectIfSignedIn), and
+  // right now that's the demo account. So sign out of it first.
+  async function handleSignUpFromDemo() {
+    await handleSignOut()
+    navigate('/signup')
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-page text-ink font-sans text-sm">
@@ -81,6 +98,8 @@ export default function AppLayout() {
 
         <div className="grow" />
 
+        {business?.isDemo && !isDemoReadOnly && <ResetDemoDataButton />}
+
         <div className="flex flex-col gap-1.5 rounded-[14px] border border-border bg-white p-3.5">
           <div className="flex items-center gap-2 text-[12.5px] font-medium text-ink-dim">
             <span className="h-[7px] w-[7px] rounded-full bg-border" />
@@ -93,7 +112,7 @@ export default function AppLayout() {
 
         <button
           type="button"
-          onClick={() => void signOutUser()}
+          onClick={() => void handleSignOut()}
           className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 text-left hover:bg-black/[0.03]"
         >
           <span
@@ -112,6 +131,21 @@ export default function AppLayout() {
       </nav>
 
       <main className="min-w-0 grow overflow-y-auto px-10 py-8">
+        {isDemoReadOnly && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-accent/30 bg-accent-pale px-4 py-3 text-sm text-accent-soft-text">
+            <span>
+              <strong className="font-semibold">You're looking around a shared demo.</strong> Forms work
+              like normal, but nothing you enter here is actually saved.
+            </span>
+            <button
+              type="button"
+              onClick={() => void handleSignUpFromDemo()}
+              className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white"
+            >
+              Sign up to start your own shop
+            </button>
+          </div>
+        )}
         <Outlet />
       </main>
     </div>

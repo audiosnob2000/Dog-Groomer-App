@@ -2,10 +2,13 @@ import { Timestamp, addDoc, orderBy, query } from 'firebase/firestore'
 import { DateTime } from 'luxon'
 import { type FormEvent, useMemo, useState } from 'react'
 import Button from '../../components/ui/Button'
+import DemoSavedNotice from '../../components/ui/DemoSavedNotice'
 import Modal from '../../components/ui/Modal'
 import { useBusiness } from '../../contexts/BusinessContext'
+import { useDemoMode } from '../../contexts/DemoModeContext'
 import { appointmentsCol, householdsCol, petsCol, servicesCol } from '../../firebase/firestore'
 import { useCollectionData } from '../../hooks/useCollectionData'
+import { simulateDemoSave } from '../../lib/demoSave'
 import { formatCents } from '../../lib/money'
 import { availableSlotsForDay } from '../../lib/scheduling'
 import type { Appointment } from '../../types/models'
@@ -28,6 +31,7 @@ export default function BookingModal({
   appointmentsForRange,
 }: BookingModalProps) {
   const { business } = useBusiness()
+  const { isDemoReadOnly } = useDemoMode()
   const timezone = business!.timezone
 
   const { data: households } = useCollectionData(
@@ -47,6 +51,7 @@ export default function BookingModal({
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
   const [confirmRequested, setConfirmRequested] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [demoSaved, setDemoSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const petsForHousehold = allPets.filter((p) => p.householdId === householdId)
@@ -74,6 +79,8 @@ export default function BookingModal({
     setPetIds([])
     setServiceIds([])
     setSelectedSlot(null)
+    setSaving(false)
+    setDemoSaved(false)
     setError(null)
     onClose()
   }
@@ -88,6 +95,13 @@ export default function BookingModal({
     if (!selectedSlot) return setError('Pick a time slot.')
 
     setSaving(true)
+
+    if (isDemoReadOnly) {
+      setDemoSaved(true)
+      simulateDemoSave(resetAndClose)
+      return
+    }
+
     try {
       const start = DateTime.fromISO(selectedSlot, { zone: timezone })
       const end = start.plus({ minutes: totalDurationMin })
@@ -250,6 +264,7 @@ export default function BookingModal({
           Send a confirmation reminder 24 hours before (Phase 2 — recorded now, sent once texting is set up)
         </label>
 
+        {demoSaved && <DemoSavedNotice />}
         {error && <p className="text-sm text-danger-text">{error}</p>}
 
         <div className="flex justify-end gap-2">

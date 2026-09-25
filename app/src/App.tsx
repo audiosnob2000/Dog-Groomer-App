@@ -2,6 +2,7 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
 import { AuthProvider } from './contexts/AuthContext'
 import { BusinessProvider } from './contexts/BusinessContext'
+import { DemoModeProvider } from './contexts/DemoModeContext'
 import LoginPage from './pages/auth/LoginPage'
 import SignupPage from './pages/auth/SignupPage'
 import CalendarPage from './pages/calendar/CalendarPage'
@@ -18,49 +19,51 @@ export default function App() {
   return (
     <HashRouter>
       <AuthProvider>
-        <BusinessProvider>
-          <Routes>
-            <Route
-              path="/login"
-              element={
-                <RedirectIfSignedIn>
-                  <LoginPage />
-                </RedirectIfSignedIn>
-              }
-            />
-            <Route
-              path="/signup"
-              element={
-                <RedirectIfSignedIn>
-                  <SignupPage />
-                </RedirectIfSignedIn>
-              }
-            />
-            <Route
-              path="/onboarding"
-              element={
-                <RequireAuth>
-                  <OnboardingPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              element={
-                <RequireAuth>
-                  <RequireBusiness>
-                    <AppLayout />
-                  </RequireBusiness>
-                </RequireAuth>
-              }
-            >
-              <Route index element={<TodayPage />} />
-              <Route path="calendar" element={<CalendarPage />} />
-              <Route path="households" element={<HouseholdsPage />} />
-              <Route path="households/:householdId" element={<HouseholdDetailPage />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BusinessProvider>
+        <DemoModeProvider>
+          <BusinessProvider>
+            <Routes>
+              <Route
+                path="/login"
+                element={
+                  <RedirectIfSignedIn>
+                    <LoginPage />
+                  </RedirectIfSignedIn>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <RedirectIfSignedIn>
+                    <SignupPage />
+                  </RedirectIfSignedIn>
+                }
+              />
+              <Route
+                path="/onboarding"
+                element={
+                  <RequireAuth>
+                    <OnboardingPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                element={
+                  <RequireAuth>
+                    <RequireBusiness>
+                      <AppLayout />
+                    </RequireBusiness>
+                  </RequireAuth>
+                }
+              >
+                <Route index element={<TodayPage />} />
+                <Route path="calendar" element={<CalendarPage />} />
+                <Route path="households" element={<HouseholdsPage />} />
+                <Route path="households/:householdId" element={<HouseholdDetailPage />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BusinessProvider>
+        </DemoModeProvider>
       </AuthProvider>
     </HashRouter>
   )

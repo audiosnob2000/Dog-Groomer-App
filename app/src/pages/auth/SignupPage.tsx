@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import Button from '../../components/ui/Button'
 import TextField from '../../components/ui/TextField'
 import { useAuth } from '../../contexts/AuthContext'
+import { useDemoMode } from '../../contexts/DemoModeContext'
 import { describeAuthError } from '../../lib/authErrors'
 
 export default function SignupPage() {
   const { signUp } = useAuth()
+  const { exitReadOnlyDemo } = useDemoMode()
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
@@ -26,6 +28,7 @@ export default function SignupPage() {
 
     setLoading(true)
     try {
+      exitReadOnlyDemo()
       await signUp(email, password)
       // BusinessProvider will see there's no business yet and RequireBusiness
       // (or RedirectIfSignedIn, on this route) sends them to /onboarding.

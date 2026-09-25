@@ -85,6 +85,12 @@ async function main() {
     subscriptionStatus: 'trialing',
     trialEndsAt: ts(DateTime.now().plus({ days: 14 })),
     members: { [uid]: 'owner' },
+    // Marks this business for the app's "Reset demo data" button (see
+    // ResetDemoDataButton.tsx) and the login page's "Try the demo" flow
+    // (DemoModeContext.tsx) — purely a UI flag, doesn't affect security
+    // rules. Fine to leave true even for local-dev seeding; only matters
+    // if this account is also used as the real public demo login.
+    isDemo: true,
     createdAt: now,
     updatedAt: now,
   })

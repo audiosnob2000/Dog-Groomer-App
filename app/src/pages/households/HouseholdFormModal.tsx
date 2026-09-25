@@ -1,9 +1,12 @@
 import { Timestamp, addDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { type FormEvent, useState } from 'react'
 import Button from '../../components/ui/Button'
+import DemoSavedNotice from '../../components/ui/DemoSavedNotice'
 import Modal from '../../components/ui/Modal'
 import TextField from '../../components/ui/TextField'
+import { useDemoMode } from '../../contexts/DemoModeContext'
 import { householdsCol } from '../../firebase/firestore'
+import { simulateDemoSave } from '../../lib/demoSave'
 import { normalizeUsPhoneE164 } from '../../lib/phone'
 import type { Contact, Household } from '../../types/models'
 
@@ -42,17 +45,21 @@ export default function HouseholdFormModal({
   onClose,
   household,
 }: HouseholdFormModalProps) {
+  const { isDemoReadOnly } = useDemoMode()
   const isEditing = Boolean(household)
   const [displayName, setDisplayName] = useState(household?.displayName ?? '')
   const [notes, setNotes] = useState(household?.notes ?? '')
   const [contacts, setContacts] = useState<DraftContact[]>(toDraftContacts(household))
   const [saving, setSaving] = useState(false)
+  const [demoSaved, setDemoSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   function resetAndClose() {
     setDisplayName('')
     setNotes('')
     setContacts([emptyContact()])
+    setSaving(false)
+    setDemoSaved(false)
     setError(null)
     onClose()
   }
@@ -76,6 +83,13 @@ export default function HouseholdFormModal({
     }
 
     setSaving(true)
+
+    if (isDemoReadOnly) {
+      setDemoSaved(true)
+      simulateDemoSave(resetAndClose)
+      return
+    }
+
     try {
       const contactRecords: Contact[] = validContacts.map((c, i) => {
         const existing = household?.contacts[i]
@@ -197,6 +211,7 @@ export default function HouseholdFormModal({
           />
         </div>
 
+        {demoSaved && <DemoSavedNotice />}
         {error && <p className="text-sm text-danger-text">{error}</p>}
 
         <div className="flex justify-end gap-2">
