@@ -104,7 +104,7 @@ export async function resetDemoData(bizId: string, timezone: string): Promise<vo
 
   function at(dayOffset: number, hour: number, minute: number) {
     const now = DateTime.now().setZone(timezone)
-    const today = now.weekday > 5 ? addBusinessDays(now, 1) : now // reset clicked on a weekend
+    const today = now.weekday > 5 ? addBusinessDays(now, -1) : now // reset clicked on a weekend
     return addBusinessDays(today, dayOffset).set({ hour, minute, second: 0, millisecond: 0 })
   }
 
