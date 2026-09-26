@@ -1,8 +1,7 @@
 name: Deploy to GitHub Pages
 
-# Runs on pushes to `main`. This repo doesn't have a `main` branch yet — see
-# README.md → "Deploying" for how to set one up (or point this trigger at
-# whatever branch you treat as production) before relying on this workflow.
+# Runs on every push to `main` (the repo's default/production branch), plus
+# manual runs via the Actions tab.
 on:
   push:
     branches: [main]
