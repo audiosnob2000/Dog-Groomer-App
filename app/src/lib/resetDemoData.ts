@@ -88,8 +88,24 @@ export async function resetDemoData(bizId: string, timezone: string): Promise<vo
     await batch.commit()
   }
 
+  // dayOffset counts business days (Mon–Fri only), not calendar days, so
+  // the demo never books an appointment on a day the shop is closed and
+  // the whole set stays within one business week no matter which day of
+  // the week "Reset demo data" gets clicked on.
+  function addBusinessDays(start: DateTime, offset: number): DateTime {
+    let d = start
+    const step = offset >= 0 ? 1 : -1
+    for (let remaining = Math.abs(offset); remaining > 0; ) {
+      d = d.plus({ days: step })
+      if (d.weekday <= 5) remaining -= 1
+    }
+    return d
+  }
+
   function at(dayOffset: number, hour: number, minute: number) {
-    return DateTime.now().setZone(timezone).plus({ days: dayOffset }).set({ hour, minute, second: 0, millisecond: 0 })
+    const now = DateTime.now().setZone(timezone)
+    const today = now.weekday > 5 ? addBusinessDays(now, 1) : now // reset clicked on a weekend
+    return addBusinessDays(today, dayOffset).set({ hour, minute, second: 0, millisecond: 0 })
   }
 
   for (let i = 0; i < DEMO_APPOINTMENTS.length; i += BATCH_SIZE) {

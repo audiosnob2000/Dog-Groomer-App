@@ -84,7 +84,8 @@ export const DEMO_HOUSEHOLDS: DemoHousehold[] = [
 export interface DemoAppointment {
   household: string // matches DemoHousehold.displayName
   pets: string[] // matches DemoPet.name within that household
-  dayOffset: number // days from today
+  /** Business days (Mon–Fri only) from today — see resetDemoData.ts's `at()`. */
+  dayOffset: number
   hour: number
   minute: number
   durationMin: number
@@ -95,6 +96,9 @@ export interface DemoAppointment {
   confirmedDayOffset?: number
 }
 
+// Kept within -2..+2 business days of "today" on purpose — a groomer
+// demoing this to a prospect wants everything to read as "this week", not
+// scattered across a month, and never on a day the shop is closed.
 export const DEMO_APPOINTMENTS: DemoAppointment[] = [
   {
     household: 'Okafor household',
@@ -135,43 +139,43 @@ export const DEMO_APPOINTMENTS: DemoAppointment[] = [
   {
     household: 'Torres household',
     pets: ['Luna'],
-    dayOffset: -3,
+    dayOffset: -2,
     hour: 10,
     minute: 0,
     durationMin: 45,
     serviceNames: ['Bath & Brush'],
     status: 'completed',
     paid: false,
-    confirmedDayOffset: -4,
+    confirmedDayOffset: -2,
   },
   {
     household: 'Chen household',
     pets: ['Mochi'],
-    dayOffset: -40,
+    dayOffset: -1,
     hour: 10,
     minute: 0,
     durationMin: 90,
     serviceNames: ['Full Groom'],
     status: 'completed',
     paid: true,
-    confirmedDayOffset: -41,
+    confirmedDayOffset: -2,
   },
   {
     household: 'Delgado household',
     pets: ['Biscuit', 'Waffles'],
-    dayOffset: -38,
+    dayOffset: -2,
     hour: 9,
     minute: 0,
     durationMin: 90,
     serviceNames: ['Bath & Brush', 'Nail Trim'],
     status: 'completed',
     paid: true,
-    confirmedDayOffset: -39,
+    confirmedDayOffset: -2,
   },
   {
     household: 'Nair household',
     pets: ['Juniper'],
-    dayOffset: 2,
+    dayOffset: 1,
     hour: 10,
     minute: 0,
     durationMin: 45,
@@ -182,13 +186,13 @@ export const DEMO_APPOINTMENTS: DemoAppointment[] = [
   {
     household: 'Okafor household',
     pets: ['Bruno'],
-    dayOffset: 4,
+    dayOffset: 2,
     hour: 9,
     minute: 0,
     durationMin: 90,
     serviceNames: ['Full Groom'],
     status: 'confirmed',
     paid: false,
-    confirmedDayOffset: 3,
+    confirmedDayOffset: 1,
   },
 ]
