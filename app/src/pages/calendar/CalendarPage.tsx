@@ -6,6 +6,7 @@ import { useBusiness } from '../../contexts/BusinessContext'
 import { appointmentsCol, householdsCol, petsCol } from '../../firebase/firestore'
 import { useCollectionData } from '../../hooks/useCollectionData'
 import { formatCents } from '../../lib/money'
+import { endOfWeekSunday, startOfWeekSunday } from '../../lib/week'
 import type { Appointment } from '../../types/models'
 import BookingModal from './BookingModal'
 import DayView from './DayView'
@@ -32,9 +33,9 @@ export default function CalendarPage() {
 
   const range = useMemo(() => {
     if (view === 'day') return { start: anchor.startOf('day'), end: anchor.endOf('day') }
-    if (view === 'week') return { start: anchor.startOf('week'), end: anchor.endOf('week') }
+    if (view === 'week') return { start: startOfWeekSunday(anchor), end: endOfWeekSunday(anchor) }
     // month view renders a padded grid (partial weeks before/after) — query that whole grid
-    return { start: anchor.startOf('month').startOf('week'), end: anchor.endOf('month').endOf('week') }
+    return { start: startOfWeekSunday(anchor.startOf('month')), end: endOfWeekSunday(anchor.endOf('month')) }
   }, [view, anchor])
 
   const appointmentsQuery = useMemo(
@@ -102,7 +103,7 @@ export default function CalendarPage() {
     view === 'day'
       ? `${activeAppointments.length} appointments · ${formatCents(bookedTotal)} booked`
       : view === 'week'
-        ? `Week of ${anchor.startOf('week').toFormat('LLL d')} · ${activeAppointments.length} appointments · ${formatCents(bookedTotal)} booked`
+        ? `Week of ${startOfWeekSunday(anchor).toFormat('LLL d')} · ${activeAppointments.length} appointments · ${formatCents(bookedTotal)} booked`
         : `${activeAppointments.length} appointments · ${formatCents(bookedTotal)} booked`
 
   const titleLabel =
@@ -187,7 +188,7 @@ export default function CalendarPage() {
       )}
       {!loading && view === 'week' && (
         <WeekView
-          weekStart={anchor.startOf('week')}
+          weekStart={startOfWeekSunday(anchor)}
           business={business!}
           appointments={appointments}
           householdName={householdName}

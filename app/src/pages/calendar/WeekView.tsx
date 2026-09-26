@@ -1,10 +1,14 @@
 import { DateTime } from 'luxon'
 import AppointmentBlock from './AppointmentBlock'
-import type { Appointment, Business } from '../../types/models'
-import { WEEKDAY_ORDER } from '../../types/models'
+import type { Appointment, Business, WeekdayKey } from '../../types/models'
+
+// Sunday-first, to match how the week grid is displayed and queried
+// (see lib/week.ts) — types/models.ts's WEEKDAY_ORDER is Monday-first,
+// used only for the onboarding hours-editor list order.
+const SUNDAY_FIRST_ORDER: WeekdayKey[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
 interface WeekViewProps {
-  weekStart: DateTime // Monday
+  weekStart: DateTime // Sunday
   business: Business
   appointments: Appointment[]
   householdName: (householdId: string) => string
@@ -26,7 +30,7 @@ export default function WeekView({
   return (
     <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-7">
       {days.map((day, i) => {
-        const dayKey = WEEKDAY_ORDER[i]
+        const dayKey = SUNDAY_FIRST_ORDER[i]
         const isOpen = business.hours[dayKey].isOpen
         const isToday = now.hasSame(day, 'day')
         const dayAppointments = appointments

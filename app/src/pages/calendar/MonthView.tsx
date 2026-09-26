@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 import { statusColorClasses } from '../../lib/appointmentStatus'
+import { endOfWeekSunday, startOfWeekSunday } from '../../lib/week'
 import type { Appointment } from '../../types/models'
 
 interface MonthViewProps {
@@ -13,8 +14,8 @@ const MAX_CHIPS_PER_DAY = 3
 
 export default function MonthView({ month, appointments, householdName, onSelectDay }: MonthViewProps) {
   const monthStart = month.startOf('month')
-  const gridStart = monthStart.startOf('week') // Monday on/before the 1st
-  const gridEnd = month.endOf('month').endOf('week')
+  const gridStart = startOfWeekSunday(monthStart) // Sunday on/before the 1st
+  const gridEnd = endOfWeekSunday(month.endOf('month'))
   const days: DateTime[] = []
   for (let d = gridStart; d <= gridEnd; d = d.plus({ days: 1 })) days.push(d)
 
@@ -23,7 +24,7 @@ export default function MonthView({ month, appointments, householdName, onSelect
   return (
     <div>
       <div className="grid grid-cols-7 gap-px overflow-hidden rounded-t-[14px] border border-border bg-border text-center text-xs font-semibold text-ink-muted">
-        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label) => (
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((label) => (
           <div key={label} className="bg-sidebar py-1.5">
             {label}
           </div>
