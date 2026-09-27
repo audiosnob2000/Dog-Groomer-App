@@ -15,6 +15,21 @@ import WeekView from './WeekView'
 
 type ViewMode = 'day' | 'week' | 'month'
 
+const VIEW_STORAGE_KEY = 'slotted:calendarView'
+
+function isViewMode(value: string | null): value is ViewMode {
+  return value === 'day' || value === 'week' || value === 'month'
+}
+
+function loadStoredView(): ViewMode {
+  try {
+    const stored = sessionStorage.getItem(VIEW_STORAGE_KEY)
+    return isViewMode(stored) ? stored : 'week'
+  } catch {
+    return 'week'
+  }
+}
+
 const LEGEND = [
   { label: 'Confirmed', swatch: 'bg-accent-soft' },
   { label: 'Awaiting reply', swatch: 'bg-warn-soft' },
@@ -27,7 +42,17 @@ export default function CalendarPage() {
   const bizId = business!.id
   const timezone = business!.timezone
 
-  const [view, setView] = useState<ViewMode>('week')
+  const [view, setViewState] = useState<ViewMode>(loadStoredView)
+  function setView(mode: ViewMode) {
+    setViewState(mode)
+    try {
+      sessionStorage.setItem(VIEW_STORAGE_KEY, mode)
+    } catch {
+      // sessionStorage can throw (private browsing, blocked storage) — the
+      // view just won't persist across navigation in that case, which is
+      // fine, not worth surfacing an error for.
+    }
+  }
   const [anchor, setAnchor] = useState<DateTime>(() => DateTime.now().setZone(timezone))
   const [bookingOpen, setBookingOpen] = useState(false)
 
